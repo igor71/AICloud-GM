@@ -23,17 +23,17 @@ pipeline {
                    ''' 
             }
         }
-        stage('Build The gm-tf-2.7:0.0  Docker Image ') {
+        stage('Build The gm-tf-2.7:0.1  Docker Image ') {
             steps {
-	       sh 'docker build -f Dockerfile.GM-tf-2.7 -t gm-tf-2.7:0.0 .'  
+	       sh 'docker build -f Dockerfile.GM-tf-2.7 -t gm-tf-2.7:0.1 .'  
             }
         }
-	stage('Test The gm-tf-2.7:0.0 Docker Image') { 
+	stage('Test The gm-tf-2.7:0.1 Docker Image') { 
             steps {
                 sh '''#!/bin/bash -xe
 		   echo 'Hello, Jenkins_Docker'
-                    image_id="$(docker images -q gm-tf-2.7:0.0)"
-                      if [[ "$(docker images -q gm-tf-2.7:0.0 2> /dev/null)" == "$image_id" ]]; then
+                    image_id="$(docker images -q gm-tf-2.7:0.1)"
+                      if [[ "$(docker images -q gm-tf-2.7:0.1 2> /dev/null)" == "$image_id" ]]; then
                           docker inspect --format='{{range $p, $conf := .RootFS.Layers}} {{$p}} {{end}}' $image_id
                       else
                           echo "It appears that current docker image corrapted!!!"
