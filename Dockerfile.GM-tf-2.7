@@ -177,14 +177,17 @@ RUN chmod -R 777 /home/dev
 # Install TensorFlow GPU version. #
 ###################################
 
+
 RUN cd /
 ARG CRED="server:123server123"
-RUN TFLOW=$(curl ftp://yifileserver/DOCKER_IMAGES/Tensorflow/map.csv -o map.csv') && \
-    PKG=$(awk -F, '$6 == ${TARGET_SRV}' map.csv |  awk -F [,] '$5 == 2.7' | awk -F, '$7~"1.8.0"' | awk -F, '{print $4}') && \
+RUN TFLOW=$(curl ftp://yifileserver/DOCKER_IMAGES/Tensorflow/map.csv -o map.csv) && \
+    SRV=$(echo ${TARGET_SRV} | awk -F [-] '{print $2}')
+    PKG=$(awk -F, '$6 == ${SRV}' map.csv |  awk -F [,] '$5 == 2.7' | awk -F, '$7~"1.8.0"' | awk -F, '{print $4}') && \
     curl -u ${CRED} ${TFLOW} -o ${PKG} && \
     pip --no-cache-dir install ${PKG} && \
     rm -f ${PKG}
-  
+    
+    
 ######################################################
 #    Configure the build for our CUDA configuration. #
 ######################################################
