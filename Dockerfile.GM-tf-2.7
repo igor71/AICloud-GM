@@ -2,6 +2,7 @@ FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
 MAINTAINER Igor Rabkin <igor.rabkin@xiaoyi.com>
 
+ARG TF_BRANCH=r1.8
 
 ################################################
 #     Basic desktop environment                #
@@ -175,14 +176,14 @@ RUN chmod -R 777 /home/dev
 ###################################
 # Install TensorFlow GPU version. #
 ###################################
-  RUN cd /
-  ARG TFLOW=tensorflow-1.8.0-cp27-cp27mu-linux_x86_64.whl
-  ARG CRED="server:123server123"
-  RUN  curl -u ${CRED} ftp://yifileserver/DOCKER_IMAGES/Tensorflow/Current/${TFLOW} -o ${TFLOW} && \
-       pip --no-cache-dir install ${TFLOW} && \
-       rm -f ${TFLOW}
 
-
+RUN cd /
+ARG CRED="server:123server123"
+RUN TFLOW=$(echo $(curl ftp://$CRED@yifileserver/DOCKER_IMAGES/Tensorflow/Current/ | sort -V | tail -n 1) | awk -F'[ ]' '{print $9}') && \
+    curl -u ${CRED} ftp://yifileserver/DOCKER_IMAGES/Tensorflow/Current/${TFLOW} -o ${TFLOW} && \
+    pip --no-cache-dir install ${TFLOW} && \
+    rm -f ${TFLOW}
+  
 ######################################################
 #    Configure the build for our CUDA configuration. #
 ######################################################
@@ -215,17 +216,13 @@ RUN cd /usr/local/lib && \
 COPY gpu_tf_check.py unitest.py /
       
     
-#########################################
-# Add Welcome Message With Instructions #
-#########################################
-
 RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/issue && cat /etc/motd' \
 	>> /etc/bash.bashrc \
 	; echo "\
 ||||||||||||||||||||||||||||||||||||||||||||||||||\n\
 |                                                |\n\
 | Docker container running Ubuntu                |\n\
-| with TensorFlow ${TF_BRANCH} optimized for GPU             |\n\
+| with TensorFlow ${TF_BRANCH} optimized for GPU         |\n\
 | with Intel(R) MKL Support                      |\n\
 |                                                |\n\
 ||||||||||||||||||||||||||||||||||||||||||||||||||\n\
