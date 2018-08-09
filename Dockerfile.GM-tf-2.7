@@ -179,7 +179,7 @@ RUN chmod -R 777 /home/dev
 
 RUN cd /
 ARG CRED="server:123server123"
-RUN TFLOW=$(awk -F, '$6 == $TARGET_SRV' stp://yifileserver/DOCKER_IMAGES/Tensorflow/map.csv |  awk -F [,] '$5 == 2.7' | awk -F, '$7~"1.8.0"' | awk -F, '{print $4}') && \
+RUN TFLOW=$(awk -F, '$6 == $TARGET_SRV' ftp://yifileserver/DOCKER_IMAGES/Tensorflow/map.csv |  awk -F [,] '$5 == 2.7' | awk -F, '$7~"1.8.0"' | awk -F, '{print $4}') && \
     PKG=$(echo $TFLOW | awk -F "/" '{print $6}') && \
     curl -u ${CRED} ${TFLOW} -o ${PKG} && \
     pip --no-cache-dir install ${PKG} && \
