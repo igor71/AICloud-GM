@@ -3,8 +3,10 @@ pipeline {
     stages {
         stage('Build cloud-hub:0.0 Docker Image') {
             steps {
-	       sh 'echo ${params.target_server}'
-	       sh 'docker build -f Dockerfile.CloudHub -t cloud-hub:0.0 .'  
+	       sh '''#!/bin/bash -xe
+	       		echo ${params.target_server}'
+	       		docker build -f Dockerfile.CloudHub -t cloud-hub:0.0 .
+		   '''  
             }
         }
 	stage('Test The cloud-hub:0.0 Docker Image') { 
