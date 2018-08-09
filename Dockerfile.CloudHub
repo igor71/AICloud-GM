@@ -1,0 +1,195 @@
+
+# Base Linux Ubuntu Image with SSH Daemon
+
+FROM ubuntu:16.04
+
+#################################################
+#  Update repositories -- we will need them all #
+#  the time, also when container is run         #
+#################################################
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update
+
+
+#################################################
+#          Set Time Zone Asia/Jerusalem         #
+#################################################
+
+ENV TZ=Asia/Jerusalem
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
+################################################
+#     Basic desktop environment                #
+################################################
+
+# Locale, language
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y locales
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+locale-gen
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
+
+#################################################
+#     Very basic installations                  #
+#################################################
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    build-essential \
+    python-pip \
+    python-dev \
+    python-setuptools \
+    curl \
+    wget \
+    screen \
+    ffmpeg \
+    man \
+    tree \
+    htop \
+    vim \
+    nano \
+    tzdata \
+    pv \
+    zip \
+    unzip \
+    rsync \
+    cifs-utils \
+    git \
+    iputils-ping \
+    dnsutils \
+    net-tools \
+    sudo \
+    nfs-client \
+    nfs-common \
+    mc && \
+    rm -rf /var/lib/apt/lists/*
+
+
+##############################################
+#    Installing apps for build environment   #
+##############################################
+
+RUN dpkg --add-architecture i386
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    g++ \
+    libc6-dbg \
+    gdb \
+    gdbserver \
+    zlib1g:i386 \
+    libc6:i386 \
+    libncurses5:i386 \
+    libstdc++6:i386 \
+    file \
+    gcc-multilib && \
+    rm -rf /var/lib/apt/lists/*
+
+
+################################
+# Updating PIP and Dependences #
+################################
+
+RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
+    python get-pip.py && \
+    rm get-pip.py
+
+RUN pip --no-cache-dir install \
+    ipykernel \
+    pandas \
+    Flask_SocketIO==2.9.6 \
+    Flask_Cors==3.0.3 \
+    Flask==0.12.2 \
+    redis==2.10.6 \
+    pymongo==3.4.0 \
+    APScheduler==3.3.1 \
+    opencv_python==3.3.0.10  \
+    socketIO_client==0.7.2 \
+    requests==2.18.4 \
+    Werkzeug==0.12.2 \
+    PyPrind==2.11.2 \
+    wget==3.2 \
+    ffmpy==0.2.2 \
+    simplejson==3.13.2 \
+    numpy==1.14.5 \
+    eventlet==0.23.0 \
+    && \
+    python -m ipykernel.kernelspec
+
+
+#################################################
+# PID 1 - signal forwarding and zombie fighting #
+#################################################
+
+# Add Tini
+ARG TINI_VERSION=v0.16.1
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+
+
+##############################################################
+# Upgrade packages on image & Installing and Configuring SSH #
+##############################################################
+
+RUN apt-get -q update &&\
+    DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew" --no-install-recommends openssh-server &&\
+    rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
+
+# SSH login fix. Otherwise user is kicked off after login
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+RUN mkdir /var/run/sshd
+
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
+
+
+########################################
+#    Set sudoers users to the image    #
+########################################
+
+RUN useradd -m -d /home/xiaoyi -s /bin/bash xiaoyi &&\
+    echo "xiaoyi:Susyamtamidbayam" | chpasswd && \
+    useradd -m -d /home/dev -s /bin/bash dev &&\
+    echo "dev:Lokonimhatulbasak" | chpasswd
+
+# Add the users to sudoers group
+RUN echo "xiaoyi  ALL=(ALL)  NOPASSWD: ALL" >> /etc/sudoers
+    
+# Set full permission for dev home folder
+RUN chmod -R 777 /home/dev
+
+
+#########################################
+# Add Welcome Message With Instructions #
+#########################################
+
+RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/issue && cat /etc/motd' \
+	>> /etc/bash.bashrc \
+	; echo "\
+||||||||||||||||||||||||||||||||||||||||||||||||||\n\
+|                                                |\n\
+| Docker container running Ubuntu 16.04          |\n\
+| with optimized build environment for           |\n\
+| Linux, including i386 arch support.            |\n\
+|                                                |\n\
+||||||||||||||||||||||||||||||||||||||||||||||||||\n\
+\n "\
+	> /etc/motd
+
+#####################
+# Standard SSH Port #
+#####################
+
+EXPOSE 22
+
+
+#####################
+# Default command   #
+#####################
+
+ENTRYPOINT ["/tini", "--"]
+CMD ["/usr/sbin/sshd", "-D"]
+RUN ["/bin/bash"]
+
