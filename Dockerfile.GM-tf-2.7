@@ -179,7 +179,7 @@ RUN chmod -R 777 /home/dev
 
 RUN cd /
 ARG CRED="server:123server123"
-RUN TFLOW=$(curl -u ${CRED} ftp://yifileserver/DOCKER_IMAGES/Tensorflow/map.csv -o map.csv) && \
+RUN TFLOW=$(curl -u ${CRED} ftp://yifileserver/DOCKER_IMAGES/Tensorflow/map.csv) && \
     SRV=$(echo ${TARGET_SRV} | awk -F [-] '{print $2}') && \
     PKG=$(awk -F, '$6 == ${SRV}' map.csv |  awk -F [,] '$5 == 2.7' | awk -F, '$7~"1.8.0"' | awk -F, '{print $4}') && \
     curl -u ${CRED} ${TFLOW} -o ${PKG} && \
