@@ -218,6 +218,12 @@ RUN cd /usr/local/lib && \
 #######################################
  
 COPY gpu_tf_check.py unitest.py /
+
+
+#######################
+# Cloning application #
+#######################
+RUN git clone https://yi-israel:Xuna7421@bitbucket.org/yi-israel/aicloud_gm27.git
       
     
 RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/issue && cat /etc/motd' \
@@ -239,11 +245,6 @@ RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/issue && cat /etc/motd' \
 #####################
 
 EXPOSE 22
-
-#######################
-# Cloning application #
-#######################
-RUN git clone https://yi-israel:Xuna7421@bitbucket.org/yi-israel/aicloud_gm27.git
 
 #####################
 # Default command  #
