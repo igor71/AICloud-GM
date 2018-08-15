@@ -1,6 +1,4 @@
 # AICloud-GM
-Test AI cloud
-
 ### Running docker image on the host:
 ```
 nvidia-docker run -d -p 37001:22 --name tflow_build -v /media:/media gm-tf-2.7:0.0
