@@ -223,9 +223,13 @@ COPY gpu_tf_check.py unitest.py /
 #######################
 # Cloning application #
 #######################
+
 RUN git clone https://yi-israel:Xuna7421@bitbucket.org/yi-israel/aicloud_gm27.git
       
-    
+#########################################
+# Add Welcome Message With Instructions #
+#########################################
+
 RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/issue && cat /etc/motd' \
 	>> /etc/bash.bashrc \
 	; echo "\
