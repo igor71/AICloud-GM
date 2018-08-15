@@ -2,7 +2,6 @@
 ### Running docker image on the host:
 ```
 nvidia-docker run -d -p 37001:22 --name tflow_build -v /media:/media gm-tf-2.7:0.0
-nvidia-docker run -d -p 37001:22 --name cloud-hub -v /media:/media cloud_hub:0.0
 ```
 Where: -d - >> run docker image detached, othervise use -it (will not work with gm-tf-2.7:0.0 image)
 
