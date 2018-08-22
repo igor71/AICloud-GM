@@ -30,18 +30,18 @@ pipeline {
             steps {
                 sh '''#!/bin/bash -xe
 		        echo 'Saving Docker image into tar archive'
-                        docker save gm-tf-${python_version}:${docker_tag} | pv | cat > $WORKSPACE/gm-tf-${python_version}-${docker_tag}.tar
+                        docker save gm-tf-${python_version}:${docker_tag} | pv -f | cat > $WORKSPACE/gm-tf-${python_version}-${docker_tag}.tar
 			
                         echo 'Remove Original Docker Image' 
 		        CURRENT_ID=$(docker images | grep gm-tf-${python_version} | grep ${docker_tag} | awk '{print $3}')
 			docker rmi -f gm-tf-${python_version}:${docker_tag}
                         
                         echo 'Loading Docker Image'
-                        pv $WORKSPACE/gm-tf-${python_version}-${docker_tag}.tar | docker load
-						docker tag $CURRENT_ID gm-tf-${python_version}:${docker_tag} 
+                        pv -f $WORKSPACE/gm-tf-${python_version}-${docker_tag}.tar | docker load
+			docker tag $CURRENT_ID gm-tf-${python_version}:${docker_tag} 
                         
                         echo 'Removing temp archive.'  
-                        rm $WORKSPACE/gm-tf-${python_version}-${docker_tag}.ta
+                        rm $WORKSPACE/gm-tf-${python_version}-${docker_tag}.tar
                    ''' 
 		    }
 		}
